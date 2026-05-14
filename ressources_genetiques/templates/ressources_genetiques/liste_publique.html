@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="mb-4">
+        <a href="{% url 'home' %}" class="btn btn-link text-success fw-bold p-0 text-decoration-none">
+            <i class="fas fa-arrow-left me-1"></i> Retour à l'accueil
+        </a>
+    </div>
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Catalogue du Patrimoine</h2>
+            <p id="resource-count" class="text-muted mb-0">
+                {% if ressources.paginator.count > 0 %}
+                    Affichage de {{ ressources.paginator.count }} ressources <strong>{{ type_nom }}</strong>
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <div class="input-group shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="search-input" class="form-control border-start-0"
+                       placeholder="Rechercher une espèce, une variété..." value="{{ request.GET.q }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px; overflow: hidden;">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="resource-table">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="ps-4 py-3 text-uppercase small fw-bold sortable" onclick="sortTable(0)">
+                            Catégorie <i class="fas fa-sort ms-1 opacity-50"></i>
+                        </th>
+                        <th class="py-3 text-uppercase small fw-bold sortable" onclick="sortTable(1)">
+                            Ressource <i class="fas fa-sort ms-1 opacity-50"></i>
+                        </th>
+                        <th class="py-3 text-uppercase small fw-bold sortable" onclick="sortTable(2)">
+                            Espèce <i class="fas fa-sort ms-1 opacity-50"></i>
+                        </th>
+                        <th class="py-3 text-uppercase small fw-bold sortable" onclick="sortTable(3)">
+                            Dénomination <i class="fas fa-sort ms-1 opacity-50"></i>
+                        </th>
+                        <th class="py-3 text-uppercase small fw-bold text-center sortable" onclick="sortTable(4)">
+                            Nature <i class="fas fa-sort ms-1 opacity-50"></i>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    {% for ressource in ressources %}
+                    <tr>
+                        <td class="ps-4 fw-medium text-success">{{ ressource.categorie }}</td>
+                        <td>{{ ressource.nom_ressource }}</td>
+                        <td class="text-muted fst-italic">{{ ressource.espece }}</td>
+                        <td class="fw-bold text-dark">{{ ressource.denomination }}</td>
+                        <td class="text-center">
+                            <span class="badge border border-primary text-primary rounded-pill px-3">
+                                {{ ressource.nature_genetique.nom }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr id="no-results">
+                        <td colspan="5" class="text-center py-5 text-muted">Aucune ressource trouvée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="pagination-container">
+        {% if ressources.has_other_pages %}
+        <nav aria-label="Navigation des pages">
+            <ul class="pagination justify-content-center align-items-center">
+                {% if ressources.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link shadow-sm border-0 rounded-pill me-2 px-3" href="?page={{ ressources.previous_page_number }}&type={{ type_nom }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                <li class="page-item active">
+                    <span class="page-link border-0 rounded-pill fw-bold bg-success text-white mx-1 px-4">
+                        Page {{ ressources.number }} sur {{ ressources.paginator.num_pages }}
+                    </span>
+                </li>
+                {% if ressources.has_next %}
+                    <li class="page-item">
+                        <a class="page-link shadow-sm border-0 rounded-pill ms-2 px-3" href="?page={{ ressources.next_page_number }}&type={{ type_nom }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+// --- LOGIQUE DE RECHERCHE DYNAMIQUE ---
+document.getElementById('search-input').addEventListener('input', function(e) {
+    const q = e.target.value;
+    const type = "{{ type_nom|default:'' }}";
+    const tableBody = document.getElementById('table-body');
+    const pagination = document.getElementById('pagination-container');
+    const countText = document.getElementById('resource-count');
+
+    fetch(`?q=${q}&type=${type}`, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(response => response.json())
+    .then(data => {
+        tableBody.innerHTML = '';
+        if (q.length > 0) {
+            pagination.style.opacity = '0';
+            pagination.style.pointerEvents = 'none';
+        } else {
+            pagination.style.opacity = '1';
+            pagination.style.pointerEvents = 'auto';
+        }
+
+        if (data.results.length === 0) {
+            tableBody.innerHTML = '<tr><td colspan="5" class="text-center py-5 text-muted">Aucun résultat trouvé.</td></tr>';
+            countText.innerHTML = '0 ressource trouvée';
+        } else {
+            data.results.forEach(res => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td class="ps-4 fw-medium text-success">${res.categorie}</td>
+                        <td>${res.ressource}</td>
+                        <td class="text-muted fst-italic">${res.espece}</td>
+                        <td class="fw-bold text-dark">${res.denomination}</td>
+                        <td class="text-center">
+                            <span class="badge border border-primary text-primary rounded-pill px-3">${res.nature}</span>
+                        </td>
+                    </tr>`;
+            });
+            countText.innerHTML = `${data.results.length} ressource(s) trouvée(s)`;
+        }
+    });
+});
+
+// --- LOGIQUE DE TRI DES COLONNES ---
+function sortTable(n) {
+    const table = document.getElementById("resource-table");
+    let rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+    switching = true;
+    dir = "asc";
+
+    while (switching) {
+        switching = false;
+        rows = table.rows;
+        for (i = 1; i < (rows.length - 1); i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("TD")[n];
+            y = rows[i + 1].getElementsByTagName("TD")[n];
+
+            if (dir == "asc") {
+                if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            } else if (dir == "desc") {
+                if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                    shouldSwitch = true;
+                    break;
+                }
+            }
+        }
+        if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount ++;
+        } else {
+            if (switchcount == 0 && dir == "asc") {
+                dir = "desc";
+                switching = true;
+            }
+        }
+    }
+}
+</script>
+
+<style>
+    .bg-success { background-color: #00b824 !important; }
+    .text-success { color: #00b824 !important; }
+    .page-link { color: #00b824; }
+
+    /* Style pour indiquer que les colonnes sont triables */
+    .sortable {
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .sortable:hover {
+        background-color: #f8f9fa !important;
+        color: #00b824 !important;
+    }
+    .sortable i { font-size: 0.8rem; }
+
+    #pagination-container { transition: opacity 0.3s ease; }
+</style>
+{% endblock %}

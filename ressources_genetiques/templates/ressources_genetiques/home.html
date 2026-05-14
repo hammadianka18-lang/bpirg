@@ -1,0 +1,324 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISRA | BPIRG</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+
+    <style>
+        :root {
+            --isra-green: #00b824;
+            --dark-green: #0f3d22;
+            --light-bg: #f8fafc;
+        }
+
+        @media (min-width: 992px) {
+            body { display: flex; flex-direction: column; min-height: 100vh; }
+            html, body { overflow-y: auto; }
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #ffffff; color: #222; }
+
+        /* TOP BAR */
+        .top-bar {
+            background: var(--isra-green);
+            color: white;
+            padding: 8px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* NAVBAR */
+        .main-header {
+            background: white;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .logo-area img { height: 60px; }
+        .logo-title h2 { font-size: 24px; font-weight: 800; margin: 0; color: var(--dark-green); }
+        .logo-title p { margin: 0; font-size: 12px; color: #666; }
+
+        /* HERO SECTION */
+        .hero {
+            position: relative;
+            flex-grow: 1;
+            min-height: 400px;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+                        url("https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=2000&q=80");
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            color: white;
+        }
+        .hero-content h1 { font-size: 48px; font-weight: 800; margin-bottom: 5px; }
+        .hero-content h3 { font-size: 20px; margin-bottom: 15px; }
+        .hero-content p { font-size: 16px; line-height: 1.6; margin-bottom: 25px; max-width: 800px; }
+
+        .btn-access {
+            background: var(--isra-green);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            display: inline-block;
+            transition: 0.3s;
+        }
+        .btn-access:hover { background: #00991e; color: white; transform: translateY(-2px); }
+
+        /* FEATURES (CARDS) */
+        .features {
+            padding: 50px 0;
+            background: var(--light-bg);
+            border-top: 1px solid #e2e8f0;
+        }
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            height: 100%;
+            border: none;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+        }
+
+        /* ANIMATION ZOOM CONTINUE SUR IMAGE */
+        .card-img-container {
+            height: 180px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .card-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            animation: continuousZoom 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes continuousZoom {
+            from { transform: scale(1); }
+            to { transform: scale(1.15); }
+        }
+
+        /* BADGE AVEC ANIMATION DE FLOTTEMENT */
+        .badge-count {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--isra-green);
+            color: white;
+            padding: 5px 12px;
+            min-width: 45px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 18px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 2;
+            border: 2px solid white;
+            animation: floatingBadge 3s infinite ease-in-out;
+        }
+
+        @keyframes floatingBadge {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .feature-card h6 {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--dark-green);
+            margin: 18px 0;
+            text-transform: uppercase;
+            text-align: center;
+            letter-spacing: 0.8px;
+        }
+
+        .card-footer-btn { padding: 15px; background: #fff; }
+        .btn-hover-effect { transition: all 0.3s ease; font-weight: 700; border-width: 1.5px; }
+
+        /* Effets boutons au survol de la carte */
+        .feature-card:hover .btn-outline-success { background-color: var(--isra-green); color: white; }
+        .feature-card:hover .btn-outline-primary { background-color: #0d6efd; color: white; }
+        .feature-card:hover .btn-outline-secondary { background-color: #6c757d; color: white; }
+        .feature-card:hover .btn-outline-danger { background-color: #dc3545; color: white; }
+        .feature-card:hover .btn-outline-info { background-color: #0dcaf0; color: white; }
+
+        /* FOOTER */
+        footer {
+            background: var(--dark-green);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            font-size: 13px;
+            margin-top: auto;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="container d-flex justify-content-between align-items-center">
+            <div>Coordonnatrice : Dr Mame Codou GUEYE</div>
+            <div class="d-none d-md-block">Tel : +221 33 859 1736 | codou.gueye@isra.sn</div>
+        </div>
+    </div>
+
+    <header class="main-header">
+        <div class="container">
+            <div class="logo-area d-flex align-items-center gap-3">
+                <img src="{% static 'images/isra_logo.png' %}" alt="Logo ISRA">
+                <div class="logo-title">
+                    <h2>BPIRG</h2>
+                    <p>Bureau de la Propriété Intellectuelle et des Ressources Génétiques</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="animate__animated animate__fadeInDown">ISRA BPIRG</h1>
+                <h3 class="animate__animated animate__fadeInUp">Gestion et Protection des Ressources Génétiques</h3>
+                <p class="animate__animated animate__fadeIn">
+                    Plateforme institutionnelle dédiée à la centralisation, la conservation et la valorisation
+                    du patrimoine génétique du Sénégal.
+                </p>
+                <a href="{% url 'login' %}" class="btn-access animate__animated animate__pulse animate__infinite">
+                    <i class="fas fa-lock me-2"></i> Accéder à la plateforme
+                </a>
+            </div>
+        </div>
+    </section>
+    <div class="container mt-5 mb-4">
+    <div class="text-center">
+        <h2 style="color: var(--dark-green); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; position: relative; display: inline-block; padding-bottom: 10px;">
+            Nos Ressources
+            <span style="position: absolute; bottom: 0; left: 25%; width: 50%; height: 4px; background: var(--isra-green); border-radius: 2px;"></span>
+        </h2>
+        <p class="text-muted mt-2">Découvrez la diversité du patrimoine génétique géré par le BPIRG</p>
+    </div>
+</div>
+    <section class="features">
+        <div class="container">
+            <div class="row g-4 row-cols-1 row-cols-sm-2 row-cols-lg-5 justify-content-center">
+
+                <div class="col animate__animated animate__fadeInUp" style="animation-delay: 100ms">
+                    <div class="card feature-card">
+                        <div class="card-img-container">
+                            <img src="{% static 'images/types/vegetale.jpg' %}" alt="Végétale">
+                            <span class="badge-count counter" data-target="{{ kpis.vegetale|default:0 }}">0</span>
+                        </div>
+                        <h6>Végétales</h6>
+                        <div class="card-footer-btn">
+                            <a href="{% url 'ressources_genetiques:liste_publique' %}?type=Végétale" class="btn btn-outline-success btn-hover-effect btn-sm w-100">Voir la liste</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col animate__animated animate__fadeInUp" style="animation-delay: 200ms">
+                    <div class="card feature-card">
+                        <div class="card-img-container">
+                            <img src="{% static 'images/types/animale.jpg' %}" alt="Animale">
+                            <span class="badge-count counter" data-target="{{ kpis.animale|default:0 }}">0</span>
+                        </div>
+                        <h6>Animales</h6>
+                        <div class="card-footer-btn">
+                            <a href="{% url 'ressources_genetiques:liste_publique' %}?type=Animale" class="btn btn-outline-primary btn-hover-effect btn-sm w-100">Voir la liste</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col animate__animated animate__fadeInUp" style="animation-delay: 300ms">
+                    <div class="card feature-card">
+                        <div class="card-img-container">
+                            <img src="{% static 'images/types/forestiere.jpg' %}" alt="Forestière">
+                            <span class="badge-count counter" data-target="{{ kpis.forestiere|default:0 }}">0</span>
+                        </div>
+                        <h6>Forestières</h6>
+                        <div class="card-footer-btn">
+                            <a href="{% url 'ressources_genetiques:liste_publique' %}?type=Forestière" class="btn btn-outline-secondary btn-hover-effect btn-sm w-100">Voir la liste</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col animate__animated animate__fadeInUp" style="animation-delay: 400ms">
+                    <div class="card feature-card">
+                        <div class="card-img-container">
+                            <img src="{% static 'images/types/fruitiere.jpg' %}" alt="Fruitière">
+                            <span class="badge-count counter" data-target="{{ kpis.fruitiere|default:0 }}">0</span>
+                        </div>
+                        <h6>Fruitières</h6>
+                        <div class="card-footer-btn">
+                            <a href="{% url 'ressources_genetiques:liste_publique' %}?type=Fruitière" class="btn btn-outline-danger btn-hover-effect btn-sm w-100">Voir la liste</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col animate__animated animate__fadeInUp" style="animation-delay: 500ms">
+                    <div class="card feature-card">
+                        <div class="card-img-container">
+                            <img src="{% static 'images/types/halieutique.jpg' %}" alt="Halieutique">
+                            <span class="badge-count counter" data-target="{{ kpis.halieutique|default:0 }}">0</span>
+                        </div>
+                        <h6>Halieutiques</h6>
+                        <div class="card-footer-btn">
+                            <a href="{% url 'ressources_genetiques:liste_publique' %}?type=Halieutique" class="btn btn-outline-info btn-hover-effect btn-sm w-100">Voir la liste</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        © 2026 ISRA — Bureau de la Propriété Intellectuelle et des Ressources Génétiques
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const counters = document.querySelectorAll('.counter');
+
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    // Nettoyage des espaces pour éviter le NaN
+                    const rawTarget = String(counter.getAttribute('data-target')).replace(/\s/g, '');
+                    const target = parseInt(rawTarget) || 0;
+
+                    const currentText = counter.innerText.replace(/\s/g, '');
+                    const count = parseInt(currentText) || 0;
+
+                    const speed = 100;
+                    const inc = Math.ceil(target / speed) || 1;
+
+                    if (count < target) {
+                        const nextValue = Math.min(count + inc, target);
+                        // Affichage avec séparateur de milliers local
+                        counter.innerText = nextValue.toLocaleString('fr-FR');
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = target.toLocaleString('fr-FR');
+                    }
+                };
+                updateCount();
+            });
+        });
+    </script>
+</body>
+</html>

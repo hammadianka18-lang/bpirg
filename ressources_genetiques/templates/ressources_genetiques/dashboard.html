@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load l10n %}
+
+{% block content %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --isra-dark: #1a4d2e;
+        --isra-light: #2ecc71;
+        --bg-gray: #f8fafc;
+        --card-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+    }
+    body { background-color: var(--bg-gray); font-family: 'Plus Jakarta Sans', sans-serif; color: #1e293b; }
+    .kpi-card { background: #ffffff; border-radius: 20px; padding: 1.5rem; box-shadow: var(--card-shadow); transition: all 0.3s ease; height: 100%; border-bottom: 4px solid transparent; }
+    .kpi-card:hover { transform: translateY(-5px); border-bottom-color: var(--isra-light); }
+    .kpi-value { font-size: 2.2rem; font-weight: 800; color: #0f172a; }
+    .kpi-label { font-size: 0.8rem; color: #64748b; font-weight: 700; text-transform: uppercase; }
+    .chart-card { background: #ffffff; border-radius: 24px; padding: 1.8rem; box-shadow: var(--card-shadow); height: 100%; }
+    .chart-header { font-weight: 700; margin-bottom: 1.5rem; color: var(--isra-dark); display: flex; align-items: center; gap: 10px; }
+    .btn-apply { background: var(--isra-dark); color: white; border-radius: 12px; font-weight: 600; padding: 0.6rem 1.5rem; }
+</style>
+
+<div class="container-fluid py-4 px-md-5">
+
+    <div class="page-header d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+        <div>
+            <h2 class="fw-bold mb-0">Tableau de Bord ISRA</h2>
+            <p class="text-muted">Analyse du patrimoine génétique</p>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;" data-aos="fade-up">
+        <div class="card-body p-4">
+            <form method="GET" class="row g-3">
+                <div class="col-md-2">
+                    <label class="small fw-bold text-dark">Type Ressource</label>
+                    <select name="type_ressource" class="form-select border-light bg-light">
+                        <option value="">Tous</option>
+                        {% for t in types_ressources %}
+                        <option value="{{t.id}}" {% if selected_type == t.id|stringformat:"i" %}selected{% endif %}>{{t.nom}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="small fw-bold text-dark">Catégorie</label>
+                    <select name="categorie" class="form-select border-light bg-light">
+                        <option value="">Toutes</option>
+                        {% for c in categories %}
+                        <option value="{{c.id}}" {% if selected_cat == c.id|stringformat:"i" %}selected{% endif %}>{{c.nom}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="small fw-bold text-dark">Espèce</label>
+                    <select name="espece" class="form-select border-light bg-light">
+                        <option value="">Toutes</option>
+                        {% for e in especes %}
+                        <option value="{{e.id}}" {% if selected_esp == e.id|stringformat:"i" %}selected{% endif %}>{{e.nom}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="small fw-bold text-dark">Nature</label>
+                    <select name="nature" class="form-select border-light bg-light">
+                        <option value="">Toutes</option>
+                        {% for n in natures %}
+                        <option value="{{n.id}}" {% if selected_nat == n.id|stringformat:"i" %}selected{% endif %}>{{n.nom}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-apply w-100">Appliquer</button>
+                    <a href="." class="btn btn-light rounded-3 px-3"><i class="fas fa-sync-alt"></i></a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-3" data-aos="zoom-in" data-aos-delay="100">
+            <div class="kpi-card text-center">
+                <div class="kpi-label">Ressources</div>
+                <div class="kpi-value counter" data-target="{{ total_ressources|unlocalize }}">0</div>
+            </div>
+        </div>
+        <div class="col-md-3" data-aos="zoom-in" data-aos-delay="200">
+            <div class="kpi-card text-center">
+                <div class="kpi-label">Espèces</div>
+                <div class="kpi-value counter" data-target="{{ nb_especes|unlocalize }}">0</div>
+            </div>
+        </div>
+        <div class="col-md-3" data-aos="zoom-in" data-aos-delay="300">
+            <div class="kpi-card text-center">
+                <div class="kpi-label">Catégories</div>
+                <div class="kpi-value counter" data-target="{{ nb_categories|unlocalize }}">0</div>
+            </div>
+        </div>
+        <div class="col-md-3" data-aos="zoom-in" data-aos-delay="400">
+            <div class="kpi-card text-center">
+                <div class="kpi-label">Dominante</div>
+                <div class="kpi-value" style="font-size: 1.4rem;">{{ top_nature }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8" data-aos="fade-right">
+            <div class="chart-card">
+                <div class="chart-header"><i class="fas fa-chart-bar text-success"></i> Répartition par Catégorie</div>
+                <div style="height: 400px;"><canvas id="barChart"></canvas></div>
+            </div>
+        </div>
+        <div class="col-lg-4" data-aos="fade-left">
+            <div class="chart-card">
+                <div class="chart-header"><i class="fas fa-chart-pie text-success"></i> Répartition par Nature</div>
+                <div style="height: 400px;"><canvas id="donutChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5" data-aos="fade-up">
+        <div class="col-12">
+            <div class="chart-card">
+                <div class="chart-header"><i class="fas fa-project-diagram text-success"></i> Radar d'Équilibre du Patrimoine</div>
+                <div style="height: 450px;"><canvas id="radarChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    AOS.init({ duration: 1000, once: true });
+    Chart.register(ChartDataLabels);
+
+    // Cette fonction gère l'affichage des milliers avec un espace
+    const formatNumber = (num) => num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+
+    const commonOptions = {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { datalabels: { formatter: (value) => formatNumber(value), color: '#444', font: { weight: 'bold' } } }
+    };
+
+    new Chart(document.getElementById('barChart'), {
+        type: 'bar',
+        data: { labels: {{ labels_cat|safe }}, datasets: [{ label: 'Total', data: {{ data_cat|safe }}, backgroundColor: '#1a4d2e', borderRadius: 8 }] },
+        options: { ...commonOptions, plugins: { ...commonOptions.plugins, legend: { display: false }, datalabels: { anchor: 'end', align: 'top', offset: 5 } } }
+    });
+
+    new Chart(document.getElementById('donutChart'), {
+        type: 'doughnut',
+        data: { labels: {{ labels_nat|safe }}, datasets: [{ data: {{ data_nat|safe }}, backgroundColor: ['#1a4d2e', '#2ecc71', '#3498db', '#f1c40f', '#e74c3c'], borderWidth: 3, borderColor: '#fff' }] },
+        options: { ...commonOptions, plugins: { ...commonOptions.plugins, legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }, datalabels: { color: '#fff' } } }
+    });
+
+    new Chart(document.getElementById('radarChart'), {
+        type: 'radar',
+        data: {
+            labels: {{ labels_cat|safe }},
+            datasets: [{ label: 'Volume', data: {{ data_cat|safe }}, backgroundColor: 'rgba(46, 204, 113, 0.2)', borderColor: '#2ecc71', pointBackgroundColor: '#1a4d2e', pointBorderColor: '#fff' }]
+        },
+        options: {
+            ...commonOptions,
+            plugins: { ...commonOptions.plugins, legend: { display: false }, datalabels: { color: '#1a4d2e', align: 'top', font: { size: 10, weight: 'bold' } } },
+            scales: { r: { angleLines: { display: true }, suggestedMin: 0, ticks: { display: false } } }
+        }
+    });
+
+    // Animation des compteurs
+    document.querySelectorAll('.counter').forEach(counter => {
+        const target = +counter.getAttribute('data-target');
+        if (isNaN(target)) {
+            counter.innerText = "0";
+            return;
+        }
+        let count = 0;
+        const speed = target / 40;
+        const update = () => {
+            if(count < target) {
+                count += speed;
+                counter.innerText = formatNumber(Math.ceil(count));
+                setTimeout(update, 25);
+            }
+            else {
+                counter.innerText = formatNumber(target);
+            }
+        };
+        update();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .glass-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        border-radius: 24px;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+    }
+    .form-label { font-weight: 700; color: #2d3436; font-size: 0.85rem; margin-bottom: 0.4rem; display: flex; align-items: center; }
+    .form-label i { margin-right: 8px; color: #00acc1; width: 18px; text-align: center; }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        border: 1.5px solid #e9ecef;
+        padding: 0.65rem 1rem;
+        font-size: 0.9rem;
+        background-color: #f8f9fa;
+        transition: all 0.2s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #00acc1;
+        background-color: #fff;
+        box-shadow: 0 0 0 0.25rem rgba(0, 172, 193, 0.1);
+        outline: none;
+    }
+
+    .section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: #00acc1;
+        font-weight: 800;
+        border-bottom: 2px solid #e0f7fa;
+        padding-bottom: 8px;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #00acc1, #00838f);
+        border: none;
+        border-radius: 12px;
+        padding: 1rem;
+        font-weight: 700;
+        transition: all 0.3s;
+        color: white;
+    }
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(0, 172, 193, 0.3);
+        color: white;
+    }
+
+    .loading-select { opacity: 0.5; pointer-events: none; }
+
+    /* Séparateur vertical discret entre les colonnes */
+    @media (min-width: 992px) {
+        .vertical-divider {
+            border-right: 1.5px solid #f1f3f5;
+        }
+    }
+</style>
+
+<div class="container-fluid py-4 px-md-5 animate__animated animate__fadeIn">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="fw-bold text-dark mb-0">Nouveau Patrimoine</h2>
+            <p class="text-muted small">Saisie manuelle sécurisée par protocole d'unicité</p>
+        </div>
+        <a href="{% url 'ressources_genetiques:dashboard' %}" class="btn btn-light btn-sm rounded-pill px-3 fw-bold border shadow-sm">
+            <i class="fas fa-arrow-left me-1"></i> Dashboard
+        </a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-warning border-0 shadow-sm mb-4 d-flex align-items-center" style="border-radius: 15px;">
+                <i class="fas fa-fingerprint me-3 fa-lg"></i>
+                <div class="fw-bold">{{ message }}</div>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="glass-card overflow-hidden">
+        <form method="post" id="ressourceForm">
+            {% csrf_token %}
+
+            <div class="row g-0">
+                <div class="col-lg-7 p-4 p-xl-5 vertical-divider">
+                    <h6 class="section-title"><i class="fas fa-sitemap me-2"></i>Classification & Origine</h6>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-layer-group"></i> {{ form.type_ressource.label }}</label>
+                            {{ form.type_ressource }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-tags"></i> {{ form.categorie.label }}</label>
+                            {{ form.categorie }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-leaf"></i> {{ form.nom_ressource.label }}</label>
+                            {{ form.nom_ressource }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label"><i class="fas fa-microscope"></i> {{ form.espece.label }}</label>
+                            {{ form.espece }}
+                        </div>
+                    </div>
+
+                    <div class="mt-5 p-3 bg-light rounded-3 border border-dashed text-center">
+                        <p class="small text-muted mb-0">
+                            <i class="fas fa-sync-alt text-info me-2"></i>
+                            La sélection en cascade filtre automatiquement les données cohérentes.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="col-lg-5 p-4 p-xl-5 bg-light bg-opacity-25 d-flex flex-column">
+                    <h6 class="section-title"><i class="fas fa-id-badge me-2"></i>Identité Unique</h6>
+
+                    <div class="mb-4">
+                        <label class="form-label"><i class="fas fa-id-card"></i> {{ form.denomination.label }}</label>
+                        {{ form.denomination }}
+                        <div class="form-text text-info fw-bold" style="font-size: 0.75rem;">
+                            <i class="fas fa-key me-1"></i> Clé d'unicité combinée avec l'espèce.
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <label class="form-label"><i class="fas fa-vial"></i> {{ form.nature_genetique.label }}</label>
+                        {{ form.nature_genetique }}
+                    </div>
+
+                    <div class="mt-auto">
+                        <button type="submit" class="btn btn-submit w-100 shadow-sm mb-3">
+                            <i class="fas fa-check-circle me-2"></i> Valider l'enregistrement
+                        </button>
+
+                        <div class="p-3 rounded-3 bg-white border text-center shadow-sm">
+                            <p class="text-muted mb-0" style="font-size: 0.8rem;">
+                                <i class="fas fa-user-circle me-1 text-primary"></i>
+                                Opérateur : <strong>{{ user.username }}</strong>
+                            </p>
+                            <span class="badge bg-info bg-opacity-10 text-info mt-1" style="font-size: 0.65rem;">
+                                <i class="fas fa-lock me-1"></i> Session Sécurisée
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // 1. TYPE -> CATÉGORIES
+        $("#id_type_ressource").change(function() {
+            const url = "{% url 'ressources_genetiques:ajax_load_categories' %}";
+            const typeId = $(this).val();
+            $("#id_categorie").addClass('loading-select');
+            $.ajax({
+                url: url,
+                data: { 'type_id': typeId },
+                success: function(data) {
+                    let options = '<option value="">---------</option>';
+                    data.forEach(item => { options += `<option value="${item.id}">${item.nom}</option>`; });
+                    $("#id_categorie").html(options).removeClass('loading-select');
+                    $("#id_nom_ressource, #id_espece").html('<option value="">---------</option>');
+                }
+            });
+        });
+
+        // 2. CATÉGORIE -> NOMS RESSOURCES
+        $("#id_categorie").change(function() {
+            const url = "{% url 'ressources_genetiques:ajax_load_noms' %}";
+            const catId = $(this).val();
+            $("#id_nom_ressource").addClass('loading-select');
+            $.ajax({
+                url: url,
+                data: { 'categorie_id': catId },
+                success: function(data) {
+                    let options = '<option value="">---------</option>';
+                    data.forEach(item => { options += `<option value="${item.id}">${item.nom}</option>`; });
+                    $("#id_nom_ressource").html(options).removeClass('loading-select');
+                    $("#id_espece").html('<option value="">---------</option>');
+                }
+            });
+        });
+
+        // 3. NOM -> ESPÈCES
+        $("#id_nom_ressource").change(function() {
+            const url = "{% url 'ressources_genetiques:ajax_load_especes' %}";
+            const resId = $(this).val();
+            $("#id_espece").addClass('loading-select');
+            $.ajax({
+                url: url,
+                data: { 'nom_ressource_id': resId },
+                success: function(data) {
+                    let options = '<option value="">---------</option>';
+                    data.forEach(item => { options += `<option value="${item.id}">${item.nom}</option>`; });
+                    $("#id_espece").html(options).removeClass('loading-select');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

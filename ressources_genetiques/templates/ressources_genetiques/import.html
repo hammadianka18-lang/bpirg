@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid py-4 px-md-5">
+
+    <div class="page-header mb-4">
+        <h2 class="fw-bold mb-0">Importation de données</h2>
+        <p class="text-muted">Alimentez la base BPIRG en masse via Excel ou CSV</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {% if 'success' in message.tags %}alert-success border-success{% else %}alert-danger{% endif %} alert-dismissible fade show shadow-sm mb-4" role="alert" style="border-radius: 15px;">
+                <div class="d-flex align-items-center">
+                    <i class="fas {% if 'success' in message.tags %}fa-check-circle{% else %}fa-exclamation-circle{% endif %} fa-2x me-3"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0">{{ message }}</h6>
+                        {% if 'success' in message.tags %}
+                        <small>Le système a automatiquement ignoré les entrées déjà présentes en base de données.</small>
+                        {% endif %}
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100" style="border-radius: 20px;">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="bg-primary bg-opacity-10 p-3 rounded-3 me-3">
+                            <i class="fas fa-shield-alt text-primary fa-lg"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Règles d'importation et Intégrité</h5>
+                    </div>
+
+                    <div class="alert alert-warning border-0 bg-warning bg-opacity-10 mb-4" style="border-radius: 12px;">
+                        <p class="small mb-0">
+                            <strong><i class="fas fa-fingerprint me-1"></i> Protection contre les doublons :</strong>
+                            Le système identifie chaque ressource par sa <strong>Dénomination</strong> et son <strong>Espèce</strong>.
+                            Si une ligne de votre fichier existe déjà, elle sera ignorée (ou mise à jour) pour éviter toute redondance.
+                        </p>
+                    </div>
+
+                    <div class="table-responsive rounded-3 border">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="p-3 small text-primary">TYPE DE RESSOURCE</th>
+                                    <th class="p-3 small text-primary">CATEGORIE</th>
+                                    <th class="p-3 small text-primary">RESSOURCE GÉNÉTIQUE</th>
+                                    <th class="p-3 small text-primary">ESPÈCE</th>
+                                    <th class="p-3 small text-primary">DÉNOMINATION</th>
+                                    <th class="p-3 small text-primary">NATURE GÉNÉTIQUE</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="text-muted" style="font-size: 0.8rem;">
+                                    <td class="p-3">Végétale</td>
+                                    <td class="p-3">Céréales</td>
+                                    <td class="p-3">Mil</td>
+                                    <td class="p-3">Pennisetum glaucum</td>
+                                    <td class="p-3">Souna 3</td>
+                                    <td class="p-3">Variété améliorée</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="row mt-4 g-3">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-success bg-opacity-5">
+                                <h6 class="fw-bold small text-success"><i class="fas fa-sync-alt me-2"></i>Synchronisation</h6>
+                                <p class="small text-muted mb-0">Vous pouvez réimporter le même fichier sans crainte de polluer la base.</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-info bg-opacity-5">
+                                <h6 class="fw-bold small text-info"><i class="fas fa-magic me-2"></i>Auto-création</h6>
+                                <p class="small text-muted mb-0">Les Types, Catégories et Espèces manquants sont créés à la volée.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm border-top border-info border-4 h-100" style="border-radius: 20px;">
+                <div class="card-body p-4 d-flex flex-column">
+                    <h5 class="fw-bold mb-4">Sélectionner le fichier</h5>
+
+                    <form method="post" enctype="multipart/form-data" class="flex-grow-1">
+                        {% csrf_token %}
+
+                        <div class="upload-zone p-4 border-2 border-dashed rounded-4 text-center mb-4 bg-light bg-opacity-25"
+                             style="border: 2px dashed #dee2e6; transition: 0.3s;">
+                            <i class="fas fa-file-csv fa-3x text-info mb-3"></i>
+                            <input type="file" name="file" id="file" class="form-control form-control-sm mb-2" accept=".xlsx, .csv" required>
+                            <p class="text-muted small mb-0">Cliquez ou déposez votre fichier ici.</p>
+                        </div>
+
+                        <button type="submit" class="btn btn-info text-white w-100 rounded-3 fw-bold py-3 shadow-sm mb-3">
+                            <i class="fas fa-upload me-2"></i> Analyser et Importer
+                        </button>
+                    </form>
+
+                    <div class="mt-auto pt-3 border-top text-center">
+                        <a href="{% url 'ressources_genetiques:dashboard' %}" class="btn btn-link btn-sm text-decoration-none text-muted">
+                            <i class="fas fa-chevron-left me-1"></i> Annuler et retour
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .border-dashed { border-style: dashed !important; }
+    .upload-zone:hover { border-color: #0dcaf0 !important; background-color: #fff !important; }
+</style>
+{% endblock %}

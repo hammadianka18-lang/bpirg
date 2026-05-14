@@ -1,0 +1,381 @@
+/* =========================
+STYLE GLOBAL
+========================= */
+
+body{
+background:#f4f6f9;
+font-family:'Inter', "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+font-size:14px;
+color:#2c3e50;
+margin:0;
+padding:0;
+}
+
+/* =========================
+TYPOGRAPHIE PRO
+========================= */
+
+h1, h2, h3, h4, h5, h6{
+font-weight:600;
+color:#1f2d3d;
+}
+
+.table{
+font-size:13.5px;
+}
+
+.navbar-brand{
+font-weight:600;
+}
+
+.sidebar .nav-link{
+font-weight:500;
+}
+
+.btn{
+font-weight:500;
+}
+
+label{
+font-weight:500;
+}
+
+/* =========================
+TOP NAVBAR
+========================= */
+
+.top-navbar{
+
+background:linear-gradient(90deg,#2f5f8f,#3c6ea3);
+height:60px;
+padding-left:20px;
+padding-right:20px;
+box-shadow:0 2px 6px rgba(0,0,0,0.15);
+
+position:fixed;
+top:0;
+left:0;
+right:0;
+z-index:1000;
+
+}
+
+.navbar-brand{
+
+font-size:20px;
+letter-spacing:0.5px;
+
+}
+
+.notification-icon{
+
+font-size:18px;
+color:white;
+cursor:pointer;
+
+}
+
+
+/* =========================
+SIDEBAR
+========================= */
+
+.sidebar{
+
+position:fixed;
+top:60px;
+left:0;
+
+width:250px;
+height:100%;
+
+background:linear-gradient(180deg,#0f5f2e,#1f7a43);
+
+padding-top:20px;
+
+color:white;
+
+box-shadow:2px 0 8px rgba(0,0,0,0.1);
+
+}
+
+
+/* titre sidebar */
+
+.sidebar-header{
+
+padding:10px 20px;
+border-bottom:1px solid rgba(255,255,255,0.2);
+
+}
+
+/* liens */
+
+.sidebar .nav-link{
+
+color:white;
+padding:12px 20px;
+
+display:flex;
+align-items:center;
+
+gap:10px;
+
+font-size:15px;
+
+transition:0.3s;
+
+}
+
+.sidebar .nav-link i{
+
+font-size:18px;
+
+}
+
+
+/* hover */
+
+.sidebar .nav-link:hover{
+
+background:rgba(255,255,255,0.1);
+border-left:4px solid #a3f1c0;
+
+}
+
+
+/* utilisateur */
+
+.user-info{
+
+opacity:0.8;
+font-size:14px;
+
+}
+
+
+/* =========================
+CONTENU PRINCIPAL
+========================= */
+
+.main-content{
+
+margin-left:250px;
+margin-top:70px;
+
+padding:30px;
+
+}
+
+
+/* =========================
+HEADER PAGE
+========================= */
+
+.page-header{
+
+background:white;
+
+padding:15px 25px;
+
+border-radius:10px;
+
+box-shadow:0 2px 8px rgba(0,0,0,0.05);
+
+margin-bottom:20px;
+
+}
+
+
+
+/* =========================
+CARDS
+========================= */
+
+.card{
+
+border:none;
+border-radius:12px;
+
+box-shadow:0 3px 12px rgba(0,0,0,0.08);
+
+}
+
+
+/* =========================
+KPI DASHBOARD
+========================= */
+
+.kpi-card{
+
+border-radius:14px;
+transition:0.3s;
+
+}
+
+.kpi-card:hover{
+
+transform:translateY(-4px);
+box-shadow:0 10px 25px rgba(0,0,0,0.12);
+
+}
+
+.kpi-title{
+
+font-size:14px;
+color:#6c757d;
+margin-bottom:5px;
+
+}
+
+.kpi-value{
+
+font-size:26px;
+font-weight:700;
+
+}
+
+.kpi-icon{
+
+width:50px;
+height:50px;
+
+border-radius:10px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+color:white;
+font-size:20px;
+
+}
+
+
+/* =========================
+TABLES
+========================= */
+
+.table{
+
+background:white;
+border-radius:10px;
+overflow:hidden;
+
+}
+
+.table thead{
+
+background:#e6f0ea;
+
+}
+
+.table th{
+
+font-weight:600;
+
+}
+
+.table td{
+
+vertical-align:middle;
+
+}
+
+
+/* =========================
+BOUTONS
+========================= */
+
+.btn-primary{
+
+background:#2d6cdf;
+border:none;
+
+}
+
+.btn-primary:hover{
+
+background:#1f4fb2;
+
+}
+
+.btn-success{
+
+background:#28a745;
+border:none;
+
+}
+
+.btn-success:hover{
+
+background:#1f8a39;
+
+}
+
+.btn-danger{
+
+background:#dc3545;
+border:none;
+
+}
+
+.btn-danger:hover{
+
+background:#b52a37;
+
+}
+
+
+/* =========================
+FORMULAIRES
+========================= */
+
+.form-control{
+
+border-radius:8px;
+
+}
+
+.form-select{
+
+border-radius:8px;
+
+}
+
+
+/* =========================
+RESPONSIVE
+========================= */
+
+@media(max-width:992px){
+
+.sidebar{
+
+width:200px;
+
+}
+
+.main-content{
+
+margin-left:200px;
+
+}
+
+}
+
+@media(max-width:768px){
+
+.sidebar{
+
+display:none;
+
+}
+
+.main-content{
+
+margin-left:0;
+
+}
+
+}

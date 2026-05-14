@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    .bg-soft-info { background-color: rgba(0, 172, 193, 0.1); }
+    .text-info { color: #00acc1 !important; }
+    .btn-info { background: linear-gradient(135deg, #00acc1, #00838f); border: none; }
+    .form-control, .form-select { border-radius: 12px; border: 1.5px solid #e0e0e0; padding: 0.75rem 1rem; }
+    .loading-select { opacity: 0.5; pointer-events: none; }
+</style>
+
+<div class="container py-5" style="max-width: 800px;">
+    <div class="mb-4">
+        <a href="{% url 'ressources_genetiques:liste' %}" class="text-decoration-none text-muted">
+            <i class="fas fa-arrow-left me-1"></i> Annuler et revenir à la liste
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-lg" style="border-radius: 25px;">
+        <div class="card-body p-5">
+            <div class="d-flex align-items-center mb-4">
+                <div class="bg-soft-info p-3 rounded-4 me-3">
+                    <i class="fas fa-edit fa-2x text-info"></i>
+                </div>
+                <div>
+                    <h3 class="fw-bold mb-0">Modifier la ressource</h3>
+                    <p class="text-muted mb-0">Édition de : <span class="text-info fw-bold">{{ ressource.denomination }}</span></p>
+                </div>
+            </div>
+
+            <form method="post" id="ressourceForm" class="row g-4">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="{% if field.name == 'denomination' %}col-12{% else %}col-md-6{% endif %}">
+                    <label class="form-label fw-bold small text-uppercase text-muted">
+                        <i class="fas {% if field.name == 'type_ressource' %}fa-layer-group{% elif field.name == 'categorie' %}fa-tags{% elif field.name == 'nom_ressource' %}fa-leaf{% elif field.name == 'espece' %}fa-microscope{% else %}fa-pen{% endif %} me-1"></i>
+                        {{ field.label }}
+                    </label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="col-12 mt-5">
+                    <button type="submit" class="btn btn-info text-white w-100 rounded-pill py-3 fw-bold shadow">
+                        <i class="fas fa-save me-2"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script AJAX pour la cascade en mode Modification -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function() {
+        // Fonction générique pour charger les données
+        function updateCascade(parentId, targetId, url, dataKey, nextResetIds) {
+            const val = $(parentId).val();
+            if (!val) return;
+
+            $(targetId).addClass('loading-select');
+            $.ajax({
+                url: url,
+                data: { [dataKey]: val },
+                success: function(data) {
+                    const currentVal = $(targetId).val(); // On garde la valeur actuelle
+                    let options = '<option value="">---------</option>';
+                    data.forEach(item => {
+                        let selected = (item.id == currentVal) ? 'selected' : '';
+                        options += `<option value="${item.id}" ${selected}>${item.nom}</option>`;
+                    });
+                    $(targetId).html(options).removeClass('loading-select');
+                }
+            });
+        }
+
+        // 1. Changement du TYPE
+        $("#id_type_ressource").change(function() {
+            $("#id_nom_ressource, #id_espece").html('<option value="">---------</option>');
+            updateCascade("#id_type_ressource", "#id_categorie", "{% url 'ressources_genetiques:ajax_load_categories' %}", 'type_id');
+        });
+
+        // 2. Changement de la CATÉGORIE
+        $("#id_categorie").change(function() {
+            $("#id_espece").html('<option value="">---------</option>');
+            updateCascade("#id_categorie", "#id_nom_ressource", "{% url 'ressources_genetiques:ajax_load_noms' %}", 'categorie_id');
+        });
+
+        // 3. Changement du NOM
+        $("#id_nom_ressource").change(function() {
+            updateCascade("#id_nom_ressource", "#id_espece", "{% url 'ressources_genetiques:ajax_load_especes' %}", 'nom_ressource_id');
+        });
+    });
+</script>
+{% endblock %}

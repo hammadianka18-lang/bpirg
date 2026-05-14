@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="mb-4">
+        <h3 class="fw-bold"><i class="fas fa-cogs text-success me-2"></i>Configuration du Système</h3>
+        <p class="text-muted">Gérez les éléments des listes déroulantes (Ajout, Modification, Suppression).</p>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+        <div class="card-header bg-white border-0 pt-3">
+            <ul class="nav nav-pills nav-fill" id="configTabs" role="tablist">
+                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#type-pane">1. Types</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#cat-pane">2. Catégories</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#nom-pane">3. Noms</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#esp-pane">4. Espèces</button></li>
+                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#nat-pane">Natures</button></li>
+            </ul>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="tab-content">
+
+                <!-- 1. ONGLET TYPES -->
+                <div class="tab-pane fade show active" id="type-pane">
+                    <form method="POST" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="ajouter">
+                        <input type="hidden" name="type_action" value="type">
+                        <div class="col-md-9">
+                            <input type="text" name="nom" class="form-control" placeholder="Nom du nouveau type (ex: Animale)" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100">Ajouter le Type</button>
+                        </div>
+                    </form>
+                    <div class="list-group">
+                        {% for t in types %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ t.nom }}</span>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ t.id }}" data-nom="{{ t.nom }}" data-type="type"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ t.id }}" data-nom="{{ t.nom }}" data-type="type"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- 2. ONGLET CATEGORIES -->
+                <div class="tab-pane fade" id="cat-pane">
+                    <form method="POST" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="ajouter">
+                        <input type="hidden" name="type_action" value="categorie">
+                        <div class="col-md-4">
+                            <select name="parent_id" class="form-select" required>
+                                <option value="">Choisir le Type parent...</option>
+                                {% for t in types %}<option value="{{ t.id }}">{{ t.nom }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="nom" class="form-control" placeholder="Nom de la catégorie" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100">Ajouter</button>
+                        </div>
+                    </form>
+                    <table class="table align-middle">
+                        <thead><tr><th>Catégorie</th><th>Type</th><th class="text-end">Actions</th></tr></thead>
+                        <tbody>
+                            {% for c in categories %}
+                            <tr>
+                                <td class="fw-bold">{{ c.nom }}</td>
+                                <td><span class="badge bg-secondary">{{ c.type_ressource.nom }}</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ c.id }}" data-nom="{{ c.nom }}" data-type="categorie"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ c.id }}" data-nom="{{ c.nom }}" data-type="categorie"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 3. ONGLET NOMS -->
+                <div class="tab-pane fade" id="nom-pane">
+                    <form method="POST" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="ajouter">
+                        <input type="hidden" name="type_action" value="nom_ressource">
+                        <div class="col-md-4">
+                            <select name="parent_id" class="form-select" required>
+                                <option value="">Choisir la Catégorie...</option>
+                                {% for c in categories %}<option value="{{ c.id }}">{{ c.nom }} ({{ c.type_ressource.nom }})</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="nom" class="form-control" placeholder="Nom de la ressource" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100">Ajouter</button>
+                        </div>
+                    </form>
+                    <table class="table align-middle">
+                        <thead><tr><th>Nom</th><th>Catégorie</th><th class="text-end">Actions</th></tr></thead>
+                        <tbody>
+                            {% for n in noms_ressources %}
+                            <tr>
+                                <td class="fw-bold">{{ n.nom }}</td>
+                                <td><span class="badge bg-info text-dark">{{ n.categorie.nom }}</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ n.id }}" data-nom="{{ n.nom }}" data-type="nom_ressource"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ n.id }}" data-nom="{{ n.nom }}" data-type="nom_ressource"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 4. ONGLET ESPECES -->
+                <div class="tab-pane fade" id="esp-pane">
+                    <form method="POST" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="ajouter">
+                        <input type="hidden" name="type_action" value="espece">
+                        <div class="col-md-4">
+                            <select name="parent_id" class="form-select" required>
+                                <option value="">Choisir le Nom parent...</option>
+                                {% for n in noms_ressources %}<option value="{{ n.id }}">{{ n.nom }}</option>{% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-5">
+                            <input type="text" name="nom" class="form-control" placeholder="Nom scientifique/Espèce" required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100">Ajouter</button>
+                        </div>
+                    </form>
+                    <table class="table align-middle">
+                        <thead><tr><th>Espèce</th><th>Ressource Parente</th><th class="text-end">Actions</th></tr></thead>
+                        <tbody>
+                            {% for e in especes %}
+                            <tr>
+                                <td class="fw-bold italic">{{ e.nom }}</td>
+                                <td><span class="badge bg-warning text-dark">{{ e.nom_ressource.nom }}</span></td>
+                                <td class="text-end">
+                                    <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ e.id }}" data-nom="{{ e.nom }}" data-type="espece"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ e.id }}" data-nom="{{ e.nom }}" data-type="espece"><i class="fas fa-trash"></i></button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ONGLET NATURES -->
+                <div class="tab-pane fade" id="nat-pane">
+                    <form method="POST" class="row g-3 mb-4 bg-light p-3 rounded-3 border">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="ajouter">
+                        <input type="hidden" name="type_action" value="nature">
+                        <div class="col-md-9">
+                            <input type="text" name="nom" class="form-control" placeholder="Ex: Accession, Variété..." required>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="submit" class="btn btn-success w-100">Ajouter</button>
+                        </div>
+                    </form>
+                    <div class="list-group">
+                        {% for n in natures %}
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>{{ n.nom }}</span>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-outline-primary border-0" data-bs-toggle="modal" data-bs-target="#editModal" data-id="{{ n.id }}" data-nom="{{ n.nom }}" data-type="nature"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-outline-danger border-0" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ n.id }}" data-nom="{{ n.nom }}" data-type="nature"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODALE DE MODIFICATION -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" class="modal-content shadow-lg border-0">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="modifier">
+            <input type="hidden" name="type_action" id="edit_type_action">
+            <input type="hidden" name="item_id" id="edit_item_id">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold">Modifier l'élément</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <label class="form-label text-muted small fw-bold">NOUVEAU NOM</label>
+                <input type="text" name="nom" id="edit_nom" class="form-control rounded-3" required>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Annuler</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4">Enregistrer les changements</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODALE DE SUPPRESSION -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <form method="POST" class="modal-content border-0 shadow-lg">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="supprimer">
+            <input type="hidden" name="type_action" id="delete_type_action">
+            <input type="hidden" name="item_id" id="delete_item_id">
+            <div class="modal-body text-center py-4">
+                <div class="text-danger mb-3"><i class="fas fa-exclamation-circle fa-4x"></i></div>
+                <h4 class="fw-bold">Êtes-vous sûr ?</h4>
+                <p class="text-muted">Voulez-vous vraiment supprimer l'élément <br><b id="delete_nom_display" class="text-dark"></b> ?<br>Cette action est irréversible.</p>
+                <div class="mt-4">
+                    <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-danger rounded-pill px-3">Confirmer la suppression</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+    .nav-pills .nav-link { color: #64748b; font-weight: 600; margin: 0 5px; transition: 0.3s; }
+    .nav-pills .nav-link.active { background-color: #1a4d2e !important; box-shadow: 0 4px 10px rgba(26, 77, 46, 0.2); }
+    .bg-light { background-color: #f8f9fa !important; }
+    .italic { font-style: italic; }
+    .list-group-item:hover { background-color: #fcfcfc; }
+    .table thead { background-color: #f8f9fa; }
+</style>
+
+<script>
+    // Script pour injecter les données dans les modales dynamiquement
+    const editModal = document.getElementById('editModal')
+    editModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget
+        editModal.querySelector('#edit_item_id').value = button.getAttribute('data-id')
+        editModal.querySelector('#edit_type_action').value = button.getAttribute('data-type')
+        editModal.querySelector('#edit_nom').value = button.getAttribute('data-nom')
+    })
+
+    const deleteModal = document.getElementById('deleteModal')
+    deleteModal.addEventListener('show.bs.modal', event => {
+        const button = event.relatedTarget
+        deleteModal.querySelector('#delete_item_id').value = button.getAttribute('data-id')
+        deleteModal.querySelector('#delete_type_action').value = button.getAttribute('data-type')
+        deleteModal.querySelector('#delete_nom_display').textContent = button.getAttribute('data-nom')
+    })
+</script>
+{% endblock %}
